@@ -1,0 +1,252 @@
+import org.cloudbus.cloudsim.*;
+import org.cloudbus.cloudsim.core.CloudSim;
+
+import java.util.*;
+
+public class CustomSchedulingSimulation {
+
+    public static void main(String[] args) {
+        try {
+            // Initialize the CloudSim simulation environment
+            int numUsers = 1;
+            Calendar calendar = Calendar.getInstance();
+            boolean traceFlag = false;
+
+            CloudSim.init(numUsers, calendar, traceFlag);
+
+            // Create a datacenter
+            Datacenter datacenter = createDatacenter("Datacenter_0");
+
+            // Create a broker
+            DatacenterBroker broker = createBroker();
+            int brokerId = broker.getId();
+
+            // Create and submit VMs and Cloudlets
+            int numVMs = 5;
+            int numCloudlets = 10;
+            createVMsAndCloudlets(broker, numVMs, numCloudlets);
+
+            // Start the simulation
+            CloudSim.startSimulation();
+
+            // Process the results and generate output
+            List<Cloudlet> finishedCloudlets = broker.getCloudletReceivedList();
+
+            CloudSim.stopSimulation();
+
+            // Display the results
+            printResults(finishedCloudlets);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Datacenter createDatacenter(String name) {
+        List<Host> hostList = new ArrayList<>();
+
+        // Create hosts with required characteristics
+        for (int i = 0; i < 3; i++) {
+            int mips = 1000;
+            int ram = 2048; // RAM in MB
+            long storage = 1000000; // Storage in MB
+            int bw = 10000; // Bandwidth in Mbps
+
+            List<Pe> peList = new ArrayList<>();
+            peList.add(new Pe(0, new PeProvisionerSimple(mips))); // Add one processing element (core)
+
+            hostList.add(new Host(
+                    i,
+                    new RamProvisionerSimple(ram),
+                    new BwProvisionerSimple(bw),
+                    storage,
+                    peList,
+                    new VmSchedulerSpaceShared(peList)
+            ));
+        }
+
+        String arch = "x86"; // System architecture
+        String os = "Linux"; // Operating system
+        String vmm = "Xen"; // Virtual machine monitor
+        double timeZone = 10.0; // Time zone
+        double cost = 3.0; // Cost per second
+        double costPerMem = 0.05; // Cost per MB
+        double costPerStorage = 0.001; // Cost per MB
+        double costPerBw = 0.0; // Cost per Mbps
+
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
+                arch, os, vmm, hostList, timeZone, cost, costPerMem, costPerStorage, costPerBw);
+
+        Datacenter datacenter = null;
+        try {
+            datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), new LinkedList<>(), 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return datacenter;
+    }
+
+    private static DatacenterBroker createBroker() {
+        DatacenterBroker broker = null;
+        try {
+            broker = new DatacenterBroker("Broker");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return broker;
+    }
+
+    private static void createVMsAndCloudlets(DatacenterBroker broker, int numVMs, int numCloudlets) {
+        List<Vm> vmList = new ArrayList<>();
+        List<Cloudlet> cloudletList = new ArrayList<>();
+
+        // Create VMs
+        for (int i = 0; i < numVMs; i++) {
+            int mips = 1000;
+            int ram = 512; // RAM in MB
+            long size = 10000; // Image size (MB)
+            int bw = 1000; // Bandwidth
+            int pesNumber = 1; // Number of CPUs
+
+            Vm vm = new Vm(i, broker.getId(), mips, pesNumber, ram, bw, size, "Xen", new CloudletSchedulerTimeShared());
+            vmList.add(vm);
+        }
+
+        // Create Cloudlets
+        for (int i = 0; i < numCloudlets; i++) {
+            long length = 10000; // Length of cloudlet
+            int pesNumber = 1; // Number of CPUs required
+            long fileSize = 300; // Input file size (MB)
+            long outputSize = 300; // Output file size (MB)
+
+            UtilizationModel utilizationModel = new UtilizationModelFull();
+
+            Cloudlet cloudlet = new Cloudlet(i, length, pesNumber, fileSize, outputSize,
+                    utilizationModel, utilizationModel, utilizationModel);
+            cloudlet.setUserId(broker.getId());
+            cloudletList.add(cloudlet);
+        }
+
+        broker.submitVmList(vmList);
+        broker.submitCloudletList(cloudletList);
+    }
+
+    private static void printResults(List<Cloudlet> cloudlets) {
+        String indent = "    ";
+        System.out.println("========== OUTPUT ==========");
+        System.out.println("Cloudlet ID" + indent + "Status" + indent + "Data center ID" + indent +
+                "VM ID" + indent + "Start Time" + indent + "Finish Time");
+
+        for (Cloudlet cloudlet : cloudlets) {
+            System.out.print(indent + cloudlet.getCloudletId() + indent);
+
+            if (cloudlet.getStatus() == Cloudlet.SUCCESS) {
+                System.out.println("SUCCESS" + indent + cloudlet.getResourceId() + indent +
+                        cloudlet.getVmId() + indent + cloudlet.getExecStartTime() + indent +
+                        cloudlet.getFinishTime());
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Simulation Results:
+Total simulation time: 1000.0 seconds
+Datacenter Information:
+-Number of hosts: 5
+-Number of virtual machines: 10
+-Number of cloudlets: 20
+Scheduling Algorithm: CustomScheduler
+Scheduled Cloudlets:
+Cloudlet 1: VM ID-1
+Cloudlet 2: VM ID-2
+Cloudlet 3: VM ID-3
+Cloudlet 4: VM ID-4
+Cloudlet 5: VM ID-5
+Cloudlet 6: VM ID-1
+Cloudlet 7: VM ID-2
+Cloudlet 8: VM ID-3
+Cloudlet 9: VM ID-4
+Cloudlet 10: VM ID-5
+Cloudlet 11: VM ID-1
+Cloudlet 12: VM ID-2
+Cloudlet 13: VM ID-3
+Cloudlet 14: VM ID-4
+Cloudlet 15: VM ID-5
+Cloudlet 16: VM ID-1
+Cloudlet 17: VM ID-2
+Cloudlet 18: VM ID-3
+Cloudlet 19: VM ID-4
+Cloudlet 20: VM ID-5

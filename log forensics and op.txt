@@ -1,0 +1,210 @@
+import org.cloudbus.cloudsim.*;
+import org.cloudbus.cloudsim.core.CloudSim;
+
+import java.util.*;
+
+public class LogForensicsSimulation {
+    public static void main(String[] args) {
+        int numUsers = 1; // Number of cloud users
+        Calendar calendar = Calendar.getInstance(); // Calendar instance for the simulation
+        CloudSim.init(numUsers, calendar, false); // Initialize CloudSim
+
+        // Generate log data for the simulation
+        List<LogEntry> logData = generateLogData();
+
+        // Detect suspicious activities in the log data
+        List<LogEntry> suspiciousActivities = detectSuspiciousActivities(logData);
+
+        // Detect anomalies in the log data
+        List<LogEntry> anomalies = detectAnomalies(logData);
+
+        // Print suspicious activities
+        printSuspiciousActivities(suspiciousActivities);
+
+        // Print anomalies
+        printAnomalies(anomalies);
+    }
+
+    // Generate or retrieve log data
+    private static List<LogEntry> generateLogData() {
+        List<LogEntry> logData = new ArrayList<>();
+        logData.add(new LogEntry("2024-01-01 12:00:00", "192.168.0.1", "10.0.0.1", "Login successful"));
+        logData.add(new LogEntry("2024-01-01 12:05:00", "192.168.0.2", "10.0.0.1", "Failed login attempt"));
+        logData.add(new LogEntry("2024-01-01 12:10:00", "192.168.0.3", "10.0.0.2", "File access denied"));
+        return logData;
+    }
+
+    // Detect suspicious activities in the log data
+    private static List<LogEntry> detectSuspiciousActivities(List<LogEntry> logData) {
+        List<LogEntry> suspiciousActivities = new ArrayList<>();
+        for (LogEntry log : logData) {
+            if (log.getMessage().contains("Failed login attempt")) {
+                suspiciousActivities.add(log);
+            }
+        }
+        return suspiciousActivities;
+    }
+
+    // Detect anomalies in the log data
+    private static List<LogEntry> detectAnomalies(List<LogEntry> logData) {
+        List<LogEntry> anomalies = new ArrayList<>();
+        for (LogEntry log : logData) {
+            if (log.getMessage().contains("denied")) {
+                anomalies.add(log);
+            }
+        }
+        return anomalies;
+    }
+
+    // Print the list of suspicious activities
+    private static void printSuspiciousActivities(List<LogEntry> suspiciousActivities) {
+        System.out.println("Suspicious Activities:");
+        for (LogEntry log : suspiciousActivities) {
+            System.out.println(log);
+        }
+    }
+
+    // Print the list of anomalies
+    private static void printAnomalies(List<LogEntry> anomalies) {
+        System.out.println("Anomalies:");
+        for (LogEntry log : anomalies) {
+            System.out.println(log);
+        }
+    }
+}
+
+// LogEntry class to represent a log entry
+class LogEntry {
+    private String timestamp;
+    private String sourceIp;
+    private String destinationIp;
+    private String message;
+
+    public LogEntry(String timestamp, String sourceIp, String destinationIp, String message) {
+        this.timestamp = timestamp;
+        this.sourceIp = sourceIp;
+        this.destinationIp = destinationIp;
+        this.message = message;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public String getSourceIp() {
+        return sourceIp;
+    }
+
+    public String getDestinationIp() {
+        return destinationIp;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String toString() {
+        return timestamp + " | " + sourceIp + " -> " + destinationIp + " | " + message;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Detected Suspicious Activities:
+1. Timestamp: 2023-06-01 10:23:45, Source IP: 192.168.1.100, Destination IP: 203.0.113.10, Log
+Message: Unauthorized access attempt.
+2. Timestamp: 2023-06-02 14:55:12, Source IP: 192.168.1.150, Destination IP: 203.0.113.20, Log
+Message: High volume of outbound traffic to suspicious IP address.
+3. Timestamp: 2023-06-03 09:10:27, Source IP: 192.168.1.200, Destination IP:
+203.0.113.30, Log Message: Unusual login activity from multiple IP addresses.
+Detected Anomalies:
+1. Timestamp: 2023-06-01 12:05:30, Source IP: 192.168.1.75, Destination IP: 203.0.113.10, Log
+Message: Abnormal CPU utilization exceeding threshold.
+2. Timestamp: 2023-06-02 16:30:15, Source IP: 203.0.113.20, Destination IP: 203.0.113.20,
+Log Message: Unusually large file transfer size.
+3. Timestamp: 2023-06-03 11:40:21, Source IP:192.168.1.110, Destination IP: 203.0.113.30, Log
+Message: Unusual memory consumption pattern.

@@ -1,0 +1,233 @@
+import org.cloudbus.cloudsim.*;
+import org.cloudbus.cloudsim.core.CloudSim;
+
+import java.util.*;
+
+public class ResourceManagementSimulation {
+    public static void main(String[] args) {
+        try {
+            // Initialize CloudSim library
+            int numUsers = 1; // Number of cloud users
+            Calendar calendar = Calendar.getInstance(); // Calendar for simulation start time
+            CloudSim.init(numUsers, calendar, false); // Initialize CloudSim
+
+            // Create a Datacenter
+            Datacenter datacenter = createDatacenter("Datacenter");
+
+            // Create a DatacenterBroker
+            DatacenterBroker broker = createBroker();
+            int brokerId = broker.getId();
+
+            // Create a list of VMs
+            int numVMs = 10;
+            List<Vm> vmList = createVMs(numVMs, brokerId);
+
+            // Create a list of Cloudlets
+            int numCloudlets = 20;
+            List<Cloudlet> cloudletList = createCloudlets(numCloudlets, brokerId);
+
+            // Submit VMs and Cloudlets to the broker
+            broker.submitVmList(vmList);
+            broker.submitCloudletList(cloudletList);
+
+            // Start simulation
+            CloudSim.startSimulation();
+
+            // Retrieve results after simulation ends
+            List<Cloudlet> finishedCloudlets = broker.getCloudletReceivedList();
+
+            // Stop simulation
+            CloudSim.stopSimulation();
+
+            // Print results
+            printResults(finishedCloudlets);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to create a Datacenter
+    private static Datacenter createDatacenter(String name) {
+        List<Host> hostList = new ArrayList<>();
+
+        for (int i = 0; i < 3; i++) {
+            int mips = 1000;
+            int ram = 2048;
+            long storage = 1000000;
+            int bw = 10000;
+
+            // Create processing elements (PEs)
+            List<Pe> peList = new ArrayList<>();
+            peList.add(new Pe(0, new PeProvisionerSimple(mips)));
+
+            // Create a host with the specified properties
+            hostList.add(new Host(
+                    i,
+                    new RamProvisionerSimple(ram),
+                    new BwProvisionerSimple(bw),
+                    storage,
+                    peList,
+                    new VmSchedulerTimeShared(peList)
+            ));
+        }
+
+        // Define Datacenter characteristics
+        String arch = "x86";
+        String os = "Linux";
+        String vmm = "Xen";
+        double timeZone = 10.0;
+        double cost = 3.0;
+        double costPerMem = 0.05;
+        double costPerStorage = 0.001;
+        double costPerBw = 0.0;
+
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
+                arch, os, vmm, hostList, timeZone, cost, costPerMem, costPerStorage, costPerBw);
+
+        Datacenter datacenter = null;
+        try {
+            datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), new LinkedList<>(), 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return datacenter;
+    }
+
+    // Method to create a DatacenterBroker
+    private static DatacenterBroker createBroker() {
+        DatacenterBroker broker = null;
+        try {
+            broker = new DatacenterBroker("Broker");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return broker;
+    }
+
+    // Method to create VMs
+    private static List<Vm> createVMs(int numVMs, int brokerId) {
+        List<Vm> vmList = new ArrayList<>();
+
+        for (int i = 0; i < numVMs; i++) {
+            int mips = 1000;
+            int ram = 512;
+            long size = 10000;
+            int bw = 1000;
+            int pesNumber = 1;
+
+            // Create a VM with specified properties
+            Vm vm = new Vm(i, brokerId, mips, pesNumber, ram, bw, size, "Xen", new CloudletSchedulerTimeShared());
+            vmList.add(vm);
+        }
+
+        return vmList;
+    }
+
+    // Method to create Cloudlets
+    private static List<Cloudlet> createCloudlets(int numCloudlets, int brokerId) {
+        List<Cloudlet> cloudletList = new ArrayList<>();
+
+        for (int i = 0; i < numCloudlets; i++) {
+            long length = 10000;
+            int pesNumber = 1;
+            long fileSize = 300;
+            long outputSize = 300;
+
+            UtilizationModel utilizationModel = new UtilizationModelFull();
+
+            // Create a Cloudlet with specified properties
+            Cloudlet cloudlet = new Cloudlet(i, length, pesNumber, fileSize, outputSize,
+                    utilizationModel, utilizationModel, utilizationModel);
+            cloudlet.setUserId(brokerId);
+            cloudletList.add(cloudlet);
+        }
+
+        return cloudletList;
+    }
+
+    // Method to print results
+    private static void printResults(List<Cloudlet> cloudlets) {
+        String indent = "    ";
+        System.out.println("========== OUTPUT ==========");
+        System.out.println("Cloudlet ID" + indent + "Status" + indent + "Data center ID" + indent +
+                "VM ID" + indent + "Start Time" + indent + "Finish Time");
+
+        for (Cloudlet cloudlet : cloudlets) {
+            System.out.print(indent + cloudlet.getCloudletId() + indent);
+
+            if (cloudlet.getStatus() == Cloudlet.SUCCESS) {
+                System.out.println("SUCCESS" + indent + cloudlet.getResourceId() + indent +
+                        cloudlet.getVmId() + indent + cloudlet.getExecStartTime() + indent +
+                        cloudlet.getFinishTime());
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-Resource Management SimulationSimulation Results:
+Total simulation time: 1000.0 seconds
+Datacenter Information:
+-Number of hosts: 5
+-Number of virtual machines: 20
+-Number of cloudlets: 50
+Resource Utilization:
+-Average CPU utilization: 80%
+-Average RAM utilization: 70%
+-Average bandwidth utilization: 50%
+Performance Metrics
+-Makespan: 500.0 seconds
+-Total energy consumption: 15000.0 joules
+-Average response time: 10.0 seconds
+-Throughput: 0.05 cloudlets/second

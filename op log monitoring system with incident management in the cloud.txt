@@ -1,0 +1,89 @@
+import boto3
+
+def generate_incident(event, context):
+    # Extract relevant information from the log event
+    log_group = event['detail']['logGroup']
+    log_stream = event['detail']['logStream']
+    log_message = event['detail']['message']
+    
+    # Perform further processing or anomaly detection based on log data
+    # (This part can include more complex logic like regex matching or anomaly detection algorithms)
+    
+    # Generate an incident title and description
+    incident_title = 'Anomaly Detected in Log Stream: {}'.format(log_stream)
+    incident_description = 'Anomaly detected in log group: {}\nLog message: {}'.format(log_group, log_message)
+    
+    # Send the incident details to an incident management system
+    incident_management_service = boto3.client('incident-manager')
+    
+    # Create an incident in AWS Incident Manager
+    response = incident_management_service.create_incident(
+        title=incident_title,
+        description=incident_description,
+        impact=1,   # Define the impact level of the incident
+        urgency=1,  # Define the urgency level of the incident
+        severity=1, # Define the severity level of the incident
+    )
+    
+    # Optionally log the response or send a notification
+    print("Incident created: ", response)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Incident created:  {
+    'incidentRecordArn': 'arn:aws:incidentmanager:us-west-2:123456789012:incident/abcd1234-5678-90ab-cdef-EXAMPLE',
+    'status': 'CREATED',
+    'title': 'Anomaly Detected in Log Stream: log-stream-name',
+    'description': 'Anomaly detected in log group: log-group-name\nLog message: Example log message here',
+    'impact': 1,
+    'urgency': 1,
+    'severity': 1,
+    'createdTime': '2024-12-08T10:00:00Z',
+    'updatedTime': '2024-12-08T10:00:00Z'
+}
